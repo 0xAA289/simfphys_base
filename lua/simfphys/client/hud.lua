@@ -606,7 +606,7 @@ local function PaintSeatSwitcher(ent, pSeats, SeatCount)
 	local Passengers = {}
 	local plys = player.GetAll()
 
-	for i = 0, player.GetCount() do
+	for i = 1, player.GetCount() do
 		local ply = plys[i]
 
 		if ply:GetSimfphys() == ent then

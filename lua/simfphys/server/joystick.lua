@@ -155,13 +155,13 @@ hook.Add("JoystickInitialize", "simfphys_joystick", function()
 		category = "Simfphys (Gears)",
 	}
 
-	local enable_joystick_convar = CreateConVar("sv_simfphys_joysticksupport", "0", FCVAR_SERVER_CAN_EXECUTE, "Enable joystick support?", 0, 1)
+	local enable_joystick_convar = CreateConVar("w", "0", FCVAR_SERVER_CAN_EXECUTE, "Enable joystick support?", 0, 1)
 
 	hook.Add("Think", "simfphys_joystickhandler", function()
 		if not enable_joystick_convar:GetBool() then return end
 		local plys = player.GetAll()
 
-		for i = 0, player.GetCount() do
+		for i = 1, player.GetCount() do
 			local ply = plys[i]
 			if not ply:IsConnected() then continue end
 			local vehicle = ply:GetVehicle()
