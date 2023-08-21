@@ -157,8 +157,7 @@ hook.Add("JoystickInitialize", "simfphys_joystick", function()
 
 	local enable_joystick_convar = CreateConVar("w", "0", FCVAR_SERVER_CAN_EXECUTE, "Enable joystick support?", 0, 1)
 
-	hook.Add("Think", "simfphys_joystickhandler", function()
-		if not enable_joystick_convar:GetBool() then return end
+	local function simfphys_joystickhandler()
 		local plys = player.GetAll()
 
 		for i = 1, player.GetCount() do
@@ -202,5 +201,19 @@ hook.Add("JoystickInitialize", "simfphys_joystick", function()
 				end
 			end
 		end
-	end)
+	end
+
+	if tonumber( enable_joystick_convar:GetString() ) ~= 0 then
+		hook.Add( "Think", "simfphys_joystickhandler", simfphys_joystickhandler )
+	end
+
+	cvars.RemoveChangeCallback( "sv_simfphys_joysticksupport", "simfphys_joystickhandler" ) --incase of a lua refresh
+	cvars.AddChangeCallback( "sv_simfphys_joysticksupport", function( _, _, new )
+		if tonumber( new ) ~= 0 then
+			hook.Add( "Think", "simfphys_joystickhandler", simfphys_joystickhandler )
+		else
+			hook.Remove( "Think", "simfphys_joystickhandler" )
+		end
+	end, "simfphys_joystickhandler" )
+
 end)
