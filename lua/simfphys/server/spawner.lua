@@ -32,16 +32,15 @@ function SpawnSimfphysVehicle( Player, vname, tr )
 	local pos = tr.HitPos + Vector(0,0,25) + (vehicle.SpawnOffset or Vector(0,0,0))
 
 	local Ent = simfphys.SpawnVehicle( Player, pos, Angles, vehicle.Model, vehicle.Class, vname, vehicle )
-	
-	if not Ent:IsValid() then return end
-	
-	undo.Create( "Vehicle" )
-		undo.SetPlayer( Player )
-		undo.AddEntity( Ent )
-		undo.SetCustomUndoText( "Undone " .. vehicle.Name )
-	undo.Finish( "Vehicle (" .. tostring( vehicle.Name ) .. ")" )
+	if Ent and Ent:IsValid() then
+		undo.Create( "Vehicle" )
+			undo.SetPlayer( Player )
+			undo.AddEntity( Ent )
+			undo.SetCustomUndoText( "Undone " .. vehicle.Name )
+		undo.Finish( "Vehicle (" .. tostring( vehicle.Name ) .. ")" )
 
-	Player:AddCleanup( "vehicles", Ent )
+		Player:AddCleanup( "vehicles", Ent )
+	end
 end
 concommand.Add( "simfphys_spawnvehicle", function( ply, cmd, args ) SpawnSimfphysVehicle( ply, args[1] ) end )
 

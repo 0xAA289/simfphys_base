@@ -64,7 +64,7 @@ function ENT:Think()
 	if self.NextTick < Time then
 		self.NextTick = Time + 0.025
 
-		if self.DriverSeat:IsValid() then
+		if self.DriverSeat and self.DriverSeat:IsValid() then
 			local Driver = self.DriverSeat:GetDriver()
 			Driver = self.RemoteDriver and self.RemoteDriver:IsValid() and self.RemoteDriver or Driver
 			local OldDriver = self:GetDriver()

@@ -45,25 +45,6 @@ if SERVER then
 		local dot = Color.r * Color.g * Color.b * Color.a
 		self.OldColor = dot
 
-		timer.Simple( 0.01, function()
-			if not self:IsValid() then return end
-
-			self.WheelDust = ents.Create( "info_particle_system" )
-			self.WheelDust:SetKeyValue( "effect_name" , "WheelDust")
-			self.WheelDust:SetKeyValue( "start_active" , 0)
-			self.WheelDust:SetOwner( self )
-			self.WheelDust:SetPos( self:GetPos() + Vector(0,0,-self:BoundingRadius() * 0.4) )
-			self.WheelDust:SetAngles( self:GetAngles() )
-			self.WheelDust:Spawn()
-			self.WheelDust:Activate()
-			self.WheelDust:SetParent( self )
-			self.WheelDust.DoNotDuplicate = true
-
-			simfphys.SetOwner( self.EntityOwner, self.WheelDust )
-
-			if not istable( StormFox ) and not istable( StormFox2 ) then return end
-		end)
-
 		self.snd_roll = "simulated_vehicles/sfx/concrete_roll.wav"
 		self.snd_roll_dirt = "simulated_vehicles/sfx/dirt_roll.wav"
 		self.snd_roll_grass = "simulated_vehicles/sfx/grass_roll.wav"
@@ -128,45 +109,16 @@ if SERVER then
 
 		if EnableDust ~= self.OldVar then
 			self.OldVar = EnableDust
-
-			if EnableDust then
-				if Material == "grass" then
-					if self.WheelDust:IsValid() then
-						self.WheelDust:Fire( "Start" )
-					end
-				elseif Material == "dirt" or Material == "sand" then
-					if self.WheelDust:IsValid() then
-						self.WheelDust:Fire( "Start" )
-					end
-				end
-			else
-				if self.WheelDust:IsValid() then
-					self.WheelDust:Fire( "Stop" )
-				end
-			end
 		end
 
 		if EnableDust then
 			if Material ~= self.OldMaterial then
-				if Material == "grass" then
-					if self.WheelDust:IsValid() then
-						self.WheelDust:Fire( "Start" )
-					end
-				elseif Material == "dirt" or Material == "sand" then
-					if self.WheelDust:IsValid() then
-						self.WheelDust:Fire( "Start" )
-					end
-				else
-					if self.WheelDust:IsValid() then
-						self.WheelDust:Fire( "Stop" )
-					end
-				end
 				self.OldMaterial = Material
 			end
 		end
 
 		if self.RollSound_Broken then
-			local Volume = FastClamp( SkidSound * 0.5 + ForwardSpeed / div_1500, 0, 1 ) * WheelOnGround
+			local Volume = FastClamp( SkidSound * 0.5 + ForwardSpeed / div_1500, 0, 1 ) * ( WheelOnGround and 1 or 0 )
 			local PlaySound = Volume > 0.1
 
 			self.OldPlaySound = self.OldPlaySound or false
@@ -199,17 +151,11 @@ if SERVER then
 
 			if EnableDust then
 				if Material == "grass" then
-					if self.WheelDust:IsValid() then
-						self.WheelDust:Fire( "Start" )
-					end
 					self.RollSound_Grass = CreateSound(self, self.snd_roll_grass)
 					self.RollSound_Grass:PlayEx(0,0)
 					self.RollSound_Dirt:Stop()
 					self.RollSound:Stop()
 				elseif Material == "dirt" or Material == "sand" then
-					if self.WheelDust:IsValid() then
-						self.WheelDust:Fire( "Start" )
-					end
 					self.RollSound_Dirt = CreateSound(self, self.snd_roll_dirt)
 					self.RollSound_Dirt:PlayEx(0,0)
 					self.RollSound_Grass:Stop()
@@ -221,9 +167,6 @@ if SERVER then
 					self.RollSound:PlayEx(0,0)
 				end
 			else
-				if self.WheelDust:IsValid()then
-					self.WheelDust:Fire( "Stop" )
-				end
 				self.RollSound:Stop()
 				self.RollSound_Grass:Stop()
 				self.RollSound_Dirt:Stop()
@@ -233,26 +176,17 @@ if SERVER then
 		if EnableDust then
 			if Material ~= self.OldMaterial then
 				if Material == "grass" then
-					if self.WheelDust:IsValid() then
-						self.WheelDust:Fire( "Start" )
-					end
 					self.RollSound_Grass = CreateSound(self, self.snd_roll_grass)
 					self.RollSound_Grass:PlayEx(0,0)
 					self.RollSound_Dirt:Stop()
 					self.RollSound:Stop()
 
 				elseif Material == "dirt" or Material == "sand" then
-					if self.WheelDust:IsValid() then
-						self.WheelDust:Fire( "Start" )
-					end
 					self.RollSound_Grass:Stop()
 					self.RollSound_Dirt = CreateSound(self, self.snd_roll_dirt)
 					self.RollSound_Dirt:PlayEx(0,0)
 					self.RollSound:Stop()
 				else
-					if self.WheelDust:IsValid() then
-						self.WheelDust:Fire( "Stop" )
-					end
 					self.RollSound_Grass:Stop()
 					self.RollSound_Dirt:Stop()
 					self.RollSound = CreateSound(self, self.snd_roll)
@@ -464,6 +398,7 @@ if CLIENT then
 	end
 
 	function ENT:Think()
+		if self:IsDormant() then return end
 		local curtime = CurTime()
 		local entTable = self:GetTable()
 		entTable.SmokeTimer = entTable.SmokeTimer or 0
@@ -471,9 +406,6 @@ if CLIENT then
 			self:ManageSmoke()
 			entTable.SmokeTimer = curtime + 0.005
 		end
-
-		self:NextThink( curtime )
-		return true
 	end
 
 	local distance = 6000 * 6000

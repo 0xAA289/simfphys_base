@@ -14,12 +14,15 @@ function ENT:Initialize()
 end
 
 function ENT:Think()
-	local selfTable = self:GetTable()
-	local curtime = CurTime()
 	local Active = self:GetActive()
 	local Throttle = self:GetThrottle()
 	local LimitRPM = self:GetLimitRPM()
 	self:ManageSounds(Active, Throttle, LimitRPM)
+
+	if self:IsDormant() then return end
+	local selfTable = self:GetTable()
+	local curtime = CurTime()
+
 	selfTable.RunNext = selfTable.RunNext or 0
 
 	if selfTable.RunNext < curtime then
@@ -29,9 +32,6 @@ function ENT:Think()
 	end
 
 	self:SetPoseParameters(curtime)
-	self:NextThink(curtime)
-
-	return true
 end
 
 function ENT:CalcFlasher()
